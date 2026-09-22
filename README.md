@@ -1,0 +1,1 @@
+# Slovesa_s_pravidlami
