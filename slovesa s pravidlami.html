@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slovenské slovesá</title>
+    <style>
+        :root {
+            --primary: #3A7BD5;
+            --secondary: #00D2FF;
+            --bg-color: #F0F4F8;
+            --panel-bg: #FFFFFF;
+            --text-color: #2C3E50;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --border: #DCDFE6;
+        }
+
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Sidebar Styles */
+        .sidebar {
+            width: 320px;
+            background: var(--panel-bg);
+            border-right: 1px solid var(--border);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.05);
+            flex-shrink: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .sidebar h2 {
+            font-size: 1.15rem;
+            color: var(--primary);
+            margin: 0 0 6px 0;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 4px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-weight: 600;
+            font-size: 0.95rem;
+        }
+
+        select, input[type="checkbox"] {
+            cursor: pointer;
+        }
+
+        select {
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border);
+            font-size: 0.95rem;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.92rem;
+        }
+
+        .btn-sidebar {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-weight: 600;
+            font-size: 0.92rem;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .btn-sidebar:hover { opacity: 0.9; }
+        .btn-danger { background: var(--danger); }
+        .btn-success { background: var(--success); }
+
+        /* Stats Table Styles */
+        .stats-container {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-top: 5px;
+        }
+
+        .table-wrapper {
+            max-height: 220px;
+            overflow-y: auto;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            text-align: center;
+        }
+
+        th, td {
+            padding: 6px 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:nth-child(even) { background-color: #F8FAFC; }
+
+        /* Main Content Styles */
+        .main-content {
+            flex-grow: 1;
+            padding: 14px 20px;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            justify-content: flex-start;
+        }
+
+        .task-instruction {
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: var(--primary);
+            margin: 0 0 10px 0;
+        }
+
+        /* Keyboard Styles */
+        .keyboard-container {
+            background: var(--panel-bg);
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            margin-bottom: 12px;
+            text-align: center;
+        }
+
+        .keys-row {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .key-btn {
+            background: #EAECEE;
+            border: 1px solid #BDC3C7;
+            border-radius: 4px;
+            padding: 5px 10px;
+            font-size: 0.98rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .key-btn:hover {
+            background: var(--primary);
+            color: white;
+        }
+
+        /* Compact Grid Layouts */
+        .grid-container {
+            display: grid;
+            gap: 10px;
+            width: 100%;
+            flex-grow: 1;
+            align-content: start;
+        }
+
+        .grid-cols-1 {
+            grid-template-columns: minmax(320px, 500px);
+            justify-content: center;
+        }
+
+        .grid-cols-2 { grid-template-columns: repeat(2, 1fr); }
+        .grid-cols-3 { grid-template-columns: repeat(3, 1fr); }
+
+        /* Compact Card Styles */
+        .card {
+            background: var(--panel-bg);
+            border-radius: 6px;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card p {
+            margin: 0 0 6px 0;
+            font-size: 0.98rem;
+            line-height: 1.3;
+        }
+
+        .card-title {
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .input-field {
+            width: 100%;
+            padding: 6px 10px;
+            border: 1.5px solid var(--border);
+            border-radius: 4px;
+            font-size: 0.98rem;
+            outline: none;
+        }
+
+        .input-field:focus { border-color: var(--primary); }
+
+        .feedback-msg {
+            font-size: 0.85rem;
+            margin-top: 4px;
+            font-weight: bold;
+            min-height: 16px;
+        }
+
+        .correct-input { border-color: var(--success) !important; background-color: #E8F8F5; }
+        .incorrect-input { border-color: var(--danger) !important; background-color: #FDEDEC; }
+        .correct-msg { color: var(--success); }
+        .incorrect-msg { color: var(--danger); }
+    </style>
+</head>
+<body>
+
+    <!-- LEFT SIDEBAR -->
+    <div class="sidebar">
+        <h2>⚙️ Nastavenia</h2>
+
+        <div class="form-group">
+            <label for="level-select">Úroveň (Level):</label>
+            <select id="level-select" onchange="initTask()">
+                <option value="1">1. Úroveň (Poznávanie vzorov)</option>
+                <option value="2" selected>2. Úroveň (Aplikácia - časovanie)</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="count-select">Počet úloh:</label>
+            <select id="count-select" onchange="initTask()">
+                <option value="5">5 úloh (1 stĺpec)</option>
+                <option value="10" selected>10 úloh (2 stĺpce)</option>
+                <option value="15">15 úloh (3 stĺpce)</option>
+            </select>
+        </div>
+
+        <div class="checkbox-group">
+            <input type="checkbox" id="exceptions-toggle" checked onchange="initTask()">
+            <label for="exceptions-toggle">Zahrnúť výnimky</label>
+        </div>
+
+        <button class="btn-sidebar btn-success" onclick="checkAnswers()">Skontrolovať ✨</button>
+        <button class="btn-sidebar" onclick="initTask()">Nové úlohy 🔄</button>
+
+        <!-- STATS PANEL IN SIDEBAR -->
+        <div class="stats-container">
+            <h2>📊 Štatistika</h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Úroveň</th>
+                            <th>Skóre</th>
+                            <th>%</th>
+                        </tr>
+                    </thead>
+                    <tbody id="stats-tbody"></tbody>
+                </table>
+            </div>
+            <button class="btn-sidebar" onclick="downloadStats()">Stiahnuť 💾</button>
+            <button class="btn-sidebar btn-danger" onclick="resetStats()">Vymazať 🗑️</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div class="main-content">
+        <div class="task-instruction" id="level-description">Doplň sloveso v zátvorke v správnom tvare prítomného času:</div>
+
+        <!-- VIRTUAL KEYBOARD -->
+        <div class="keyboard-container" id="virtual-keyboard">
+            <div class="keys-row">
+                <button class="key-btn" onclick="insertChar('á')">á</button>
+                <button class="key-btn" onclick="insertChar('ä')">ä</button>
+                <button class="key-btn" onclick="insertChar('č')">č</button>
+                <button class="key-btn" onclick="insertChar('ď')">ď</button>
+                <button class="key-btn" onclick="insertChar('é')">é</button>
+                <button class="key-btn" onclick="insertChar('í')">í</button>
+                <button class="key-btn" onclick="insertChar('ĺ')">ĺ</button>
+                <button class="key-btn" onclick="insertChar('ľ')">ľ</button>
+                <button class="key-btn" onclick="insertChar('ň')">ň</button>
+                <button class="key-btn" onclick="insertChar('ó')">ó</button>
+                <button class="key-btn" onclick="insertChar('ô')">ô</button>
+                <button class="key-btn" onclick="insertChar('ŕ')">ŕ</button>
+                <button class="key-btn" onclick="insertChar('š')">š</button>
+                <button class="key-btn" onclick="insertChar('ť')">ť</button>
+                <button class="key-btn" onclick="insertChar('ú')">ú</button>
+                <button class="key-btn" onclick="insertChar('ý')">ý</button>
+                <button class="key-btn" onclick="insertChar('ž')">ž</button>
+            </div>
+        </div>
+
+        <!-- TASK GRID -->
+        <div id="grid-container" class="grid-container grid-cols-2"></div>
+    </div>
+
+<script>
+// SORREND: 1. Kradnúť, 2. Potrebovať, 3. Hovoríť, 4. Piť, 5. Musieť, 6. Rozumieť, 7. Mať, 8. Kričať, 9. Klamať
+const orderedPatternKeys = ["9", "1", "2", "3", "4", "5", "8", "6", "7"];
+
+const verbPatterns = {
+    "9": { name: "KRADNÚŤ", isException: false, verbs: ["chudnúť", "kradnúť", "starnúť", "mladnúť", "žltnúť", "hnednúť"] },
+    "1": { name: "POTREBOVAŤ", isException: false, verbs: ["bicyklovať sa", "boxovať", "cestovať", "ďakovať", "existovať", "fungovať", "gratulovať", "gumovať", "havarovať", "korčuľovať sa", "kritizovať", "lyžovať sa", "maľovať", "milovať", "nakupovať", "nastupovať", "obedovať", "odpisovať", "otravovať", "parkovať", "pilotovať", "pracovať", "predstavovať si", "raňajkovať", "reagovať", "recitovať", "relaxovať", "rýľovať", "sánkovať sa", "sľubovať", "šoférovať", "sprchovať sa", "sťažovať sa", "tancovať", "telefonovať", "ukazovať", "upratovať", "vtipkovať", "vyfarbovať", "vystupovať", "vysvetľovať"] },
+    "2": { name: "HOVORIŤ", isException: false, verbs: ["baliť", "chodiť", "chrániť", "chváliť", "cítiť sa", "cvičiť", "dovoliť", "hanbiť sa", "hlásiť sa", "kaziť", "končiť sa", "kosiť", "kresliť", "kŕmiť", "liečiť", "lúčiť sa", "lúštiť", "meniť sa", "mýliť sa", "narodiť sa", "nosiť", "nudiť sa", "páčiť sa", "robiť", "sadiť", "snežiť", "strážiť", "súhlasiť", "súťažiť", "svietiť", "tešiť sa", "tlačiť", "točiť sa", "topiť sa", "učiť sa", "učiť", "variť", "zdobiť", "zdraviť sa"] },
+    "3": { name: "PIŤ (výnimka)", isException: true, verbs: ["žiť", "piť", "počuť", "biť sa", "umyť"] },
+    "4": { name: "MUSIEŤ", isException: false, verbs: ["bolieť", "horieť", "letieť", "myslieť", "sedieť", "smrdieť", "vidieť", "visieť"] },
+    "5": { name: "ROZUMIEŤ (výnimka)", isException: true, verbs: ["utrieť", "pozrieť sa", "rozprestrieť"] },
+    "8": { name: "MAŤ", isException: false, verbs: ["behať", "blýskať sa", "búchať", "bývať", "čakať", "červenať sa", "chytať", "čítať", "dávať", "dostávať", "dvíhať", "fúkať", "hádať sa", "hľadať", "hladkať", "hnevať sa", "hojdať sa", "hrať sa", "krájať", "krvácať", "kýchať", "lietať", "mávať", "meškať", "neznášať", "oberať", "obzerať sa", "odchádzať", "odpočívať", "opekať", "odpovedať", "okopávať", "opierať sa", "otvárať", "padať", "pamätať si", "plávať", "počítať", "počúvať", "polievať", "podobať sa", "pomáhať", "ponáhľať sa", "posielať", "poslúchať", "používať", "pozerať", "poznať", "pozývať", "prichádzať", "pýtať sa", "rozmýšľať", "rozprávať", "šepkať", "šmýkať sa", "snívať", "spievať", "spoznávať", "starať sa o", "ťahať", "trhať", "umývať", "usmievať sa", "utekať", "utierať", "volať sa", "vstávať", "vyhrávať", "vysávať", "zabávať sa", "začínať sa", "zametať", "zatvárať", "zbierať", "žmurkať", "obliekať sa", "stávať", "večerať", "stmievať sa", "schovávať sa", "voňať"] },
+    "6": { name: "KRIČAŤ (výnimka)", isException: true, verbs: ["držať", "ležať", "pršať", "spať", "kričať", "bežať"] },
+    "7": { name: "KLAMAŤ (výnimka)", isException: true, verbs: ["česať sa", "frflať", "hádzať", "hrabať", "hýbať sa", "kašľať", "klamať", "kopať", "kúpať sa", "lízať", "písať", "plakať", "skákať", "škrabať sa", "chápať", "štvať", "rehotať sa"] }
+};
+
+// Pedagógiailag pontos szlovák mondatstruktúra a sa/si helyes pozíciójával
+const sentencesDatabase = [
+    { template: "Deti sa radostne {v} na rozprávke.", baseVerb: "rehotať sa", displayVerb: "rehotať", ans: "rehocú", exc: true },
+    { template: "Mama po večeri stôl rýchlo {v}.", baseVerb: "utrieť", displayVerb: "utrieť", ans: "utrie", exc: true },
+    { template: "Môj starý otec rád {v} pri stole.", baseVerb: "večerať", displayVerb: "večerať", ans: "večeria", exc: false },
+    { template: "V záhrade krásne {v} kvety.", baseVerb: "voňať", displayVerb: "voňať", ans: "voňajú", exc: false },
+    { template: "Chlapci na dvore rýchlo {v} za loptou.", baseVerb: "utekať", displayVerb: "utekať", ans: "utekajú", exc: false },
+    { template: "Oni sa na mňa pozorne {v}.", baseVerb: "pozrieť sa", displayVerb: "pozrieť", ans: "pozrú", exc: true },
+    { template: "Žiaci sa usilovne {v} novú gramatiku.", baseVerb: "učiť sa", displayVerb: "učiť", ans: "učia", exc: false },
+    { template: "Vtáky na jeseň {v} do teplých krajín.", baseVerb: "letieť", displayVerb: "letieť", ans: "letia", exc: false },
+    { template: "Sestra si pred zrkadlom vlasy {v}.", baseVerb: "česať sa", displayVerb: "česať", ans: "češe", exc: true },
+    { template: "Ja rád {v} knihu pred spaním.", baseVerb: "čítať", displayVerb: "čítať", ans: "čítam", exc: false },
+    { template: "Rodičia {v} v obchode nový nábytok.", baseVerb: "nakupovať", displayVerb: "nakupovať", ans: "nakupujú", exc: false },
+    { template: "V zime sa deti často {v} na kopci.", baseVerb: "sánkovať sa", displayVerb: "sánkovať", ans: "sánkujú", exc: false },
+    { template: "Učiteľ {v} novú úlohu na tabuľu.", baseVerb: "písať", displayVerb: "písať", ans: "píše", exc: true },
+    { template: "Slnko svieti a sneh sa rýchlo {v}.", baseVerb: "topiť sa", displayVerb: "topiť", ans: "topí", exc: false },
+    { template: "Bábätko v postieľke sladko {v}.", baseVerb: "spať", displayVerb: "spať", ans: "spí", exc: true }
+];
+
+let currentTasks = [];
+let activeInput = null;
+
+document.addEventListener('focusin', (e) => {
+    if (e.target.tagName === 'INPUT' && e.target.type === 'text') {
+        activeInput = e.target;
+    }
+});
+
+function insertChar(char) {
+    if (!activeInput) return;
+    const start = activeInput.selectionStart;
+    const end = activeInput.selectionEnd;
+    const text = activeInput.value;
+    activeInput.value = text.substring(0, start) + char + text.substring(end);
+    activeInput.focus();
+    activeInput.setSelectionRange(start + 1, start + 1);
+}
+
+function initTask() {
+    const level = document.getElementById('level-select').value;
+    const count = parseInt(document.getElementById('count-select').value);
+    const useExceptions = document.getElementById('exceptions-toggle').checked;
+    
+    const container = document.getElementById('grid-container');
+    const desc = document.getElementById('level-description');
+    
+    container.className = 'grid-container ' + (count === 5 ? 'grid-cols-1' : count === 10 ? 'grid-cols-2' : 'grid-cols-3');
+    container.innerHTML = '';
+    currentTasks = [];
+
+    if (level === "1") {
+        desc.innerText = "Urči správny časovací vzor pre dané sloveso:";
+        document.getElementById('virtual-keyboard').style.display = 'none';
+        generateLevel1(count, useExceptions);
+    } else {
+        desc.innerText = "Doplň sloveso v zátvorke v správnom tvare prítomného času:";
+        document.getElementById('virtual-keyboard').style.display = 'block';
+        generateLevel2(count, useExceptions);
+    }
+}
+
+function generateLevel1(count, useExceptions) {
+    let pool = [];
+    orderedPatternKeys.forEach(pKey => {
+        const pattern = verbPatterns[pKey];
+        if (!useExceptions && pattern.isException) return;
+        pattern.verbs.forEach(v => {
+            pool.push({ verb: v, correctPattern: pKey });
+        });
+    });
+
+    pool.sort(() => Math.random() - 0.5);
+    currentTasks = pool.slice(0, count);
+
+    const container = document.getElementById('grid-container');
+    currentTasks.forEach((task, idx) => {
+        let options = `<option value="">-- Vyber vzor --</option>`;
+        
+        orderedPatternKeys.forEach(pKey => {
+            const pattern = verbPatterns[pKey];
+            if (!useExceptions && pattern.isException) return;
+            options += `<option value="${pKey}">Vzor ${pattern.name}</option>`;
+        });
+
+        container.innerHTML += `
+            <div class="card">
+                <p>${idx + 1}. <span class="card-title">${task.verb}</span></p>
+                <select id="input-${idx}" class="input-field">${options}</select>
+                <div id="fb-${idx}" class="feedback-msg"></div>
+            </div>
+        `;
+    });
+}
+
+function generateLevel2(count, useExceptions) {
+    let pool = sentencesDatabase.filter(s => useExceptions || !s.exc);
+    pool.sort(() => Math.random() - 0.5);
+    
+    while (pool.length < count) {
+        pool = pool.concat(pool);
+    }
+    currentTasks = pool.slice(0, count);
+
+    const container = document.getElementById('grid-container');
+    currentTasks.forEach((task, idx) => {
+        const parts = task.template.split('{v}');
+        container.innerHTML += `
+            <div class="card">
+                <p>${idx + 1}. ${parts[0]} <strong>(${task.displayVerb})</strong> ${parts[1]}</p>
+                <input type="text" id="input-${idx}" class="input-field" placeholder="odpoveď..." autocomplete="off">
+                <div id="fb-${idx}" class="feedback-msg"></div>
+            </div>
+        `;
+    });
+}
+
+function checkAnswers() {
+    const level = document.getElementById('level-select').value;
+    let correctCount = 0;
+
+    currentTasks.forEach((task, idx) => {
+        const inputElem = document.getElementById(`input-${idx}`);
+        const fbElem = document.getElementById(`fb-${idx}`);
+        const userAns = inputElem.value.trim().toLowerCase();
+
+        inputElem.classList.remove('correct-input', 'incorrect-input');
+        
+        let isCorrect = false;
+        let expected = "";
+
+        if (level === "1") {
+            isCorrect = (userAns === task.correctPattern);
+            expected = `Vzor ${verbPatterns[task.correctPattern].name}`;
+        } else {
+            isCorrect = (userAns === task.ans.toLowerCase());
+            expected = task.ans;
+        }
+
+        if (isCorrect) {
+            correctCount++;
+            inputElem.classList.add('correct-input');
+            fbElem.className = "feedback-msg correct-msg";
+            fbElem.innerText = "✓ Správne";
+        } else {
+            inputElem.classList.add('incorrect-input');
+            fbElem.className = "feedback-msg incorrect-msg";
+            fbElem.innerText = `✗ ${expected}`;
+        }
+    });
+
+    addStatRecord(level, correctCount, currentTasks.length);
+}
+
+// --- STATISZTIKA KEZELÉSE ---
+function addStatRecord(level, correct, total) {
+    let history = JSON.parse(localStorage.getItem('verb_history') || '[]');
+    const percent = Math.round((correct / total) * 100);
+    
+    history.push({
+        level: level,
+        score: `${correct}/${total}`,
+        percent: `${percent}%`
+    });
+
+    localStorage.setItem('verb_history', JSON.stringify(history));
+    renderStatsTable();
+}
+
+function renderStatsTable() {
+    let history = JSON.parse(localStorage.getItem('verb_history') || '[]');
+    const tbody = document.getElementById('stats-tbody');
+    tbody.innerHTML = '';
+
+    history.forEach((row, index) => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>Úroveň ${row.level}</td>
+                <td>${row.score}</td>
+                <td><strong>${row.percent}</strong></td>
+            </tr>
+        `;
+    });
+
+    const wrapper = document.querySelector('.table-wrapper');
+    wrapper.scrollTop = wrapper.scrollHeight;
+}
+
+function resetStats() {
+    if (confirm("Naozaj chceš vymazať celú históriu štatistík?")) {
+        localStorage.removeItem('verb_history');
+        renderStatsTable();
+    }
+}
+
+function downloadStats() {
+    let history = JSON.parse(localStorage.getItem('verb_history') || '[]');
+    if (history.length === 0) {
+        alert("Zatiaľ neexistujú žiadne záznamy.");
+        return;
+    }
+
+    let content = `HISTÓRIA POKUSOV - SLOVENSKÉ SLOVESÁ\n` +
+                  `====================================\n\n` +
+                  `Pokus | Úroveň | Skóre | Úspešnosť\n` +
+                  `------------------------------------\n`;
+
+    history.forEach((row, index) => {
+        content += `${index + 1}.     | Úroveň ${row.level} | ${row.score}  | ${row.percent}\n`;
+    });
+
+    const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'statistika_pokusy.txt';
+    a.click();
+}
+
+window.onload = () => {
+    initTask();
+    renderStatsTable();
+};
+</script>
+</body>
+</html>
