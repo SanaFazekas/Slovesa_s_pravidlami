@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="sk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Slovenské slovesá - Interaktívny kvíz</title>
+    <style>
+        :root {
+            --primary: #4A90E2;
+            --secondary: #50E3C2;
+            --success: #2ECC71;
+            --danger: #E74C3C;
+            --background: #F4F7F6;
+            --card-bg: #FFFFFF;
+            --text: #2C3E50;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: var(--card-bg);
+            border-radius: 16px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            font-size: 2rem;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #7F8C8D;
+            margin-bottom: 24px;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            margin-bottom: 30px;
+            background: #FAFAFA;
+            border-radius: 12px;
+            padding: 20px;
+            border: 1px solid #EAEAEA;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 1.3rem;
+            margin-top: 0;
+            border-bottom: 2px solid var(--secondary);
+            padding-bottom: 8px;
+        }
+
+        .question {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.03);
+        }
+
+        .question p {
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+
+        select, input[type="text"] {
+            width: 100%;
+            max-width: 320px;
+            padding: 10px;
+            border: 2px solid #BDC3C7;
+            border-radius: 6px;
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        select:focus, input[type="text"]:focus {
+            border-color: var(--primary);
+        }
+
+        .fill-blank {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .fill-blank input {
+            width: 180px;
+            display: inline-block;
+            margin: 0 4px;
+        }
+
+        .btn-container {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        button:hover {
+            background-color: #357ABD;
+        }
+
+        button:active {
+            transform: scale(0.98);
+        }
+
+        .result-card {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            background: #E8F8F5;
+            border: 2px solid var(--secondary);
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+
+        .correct {
+            border-color: var(--success) !important;
+            background-color: #E8F8F5 !important;
+        }
+
+        .incorrect {
+            border-color: var(--danger) !important;
+            background-color: #FDEDEC !important;
+        }
+
+        .feedback-text {
+            font-size: 0.9rem;
+            margin-top: 4px;
+            display: block;
+        }
+
+        .feedback-text.correct-text { color: var(--success); }
+        .feedback-text.incorrect-text { color: var(--danger); }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🚀 Časovanie slovies v slovenčine</h1>
+    <p class="subtitle">Otestuj si svoje vedomosti z časovania slovies!</p>
+
+    <!-- 1. Časť: Priraďovanie vzorov -->
+    <div class="section">
+        <h2>1. časť: Urči správny časovací vzor pre sloveso</h2>
+        <div id="part1-questions"></div>
+    </div>
+
+    <!-- 2. Časť: Doplňovanie správnych tvarov -->
+    <div class="section">
+        <h2>2. časť: Doplň sloveso v správnom tvare prítomného času</h2>
+        <div id="part2-questions"></div>
+    </div>
+
+    <div class="btn-container">
+        <button onclick="checkAnswers()">Skontrolovať odpovede ✨</button>
+    </div>
+
+    <div id="result" class="result-card">
+        <h2 id="score-title" style="border:none;"></h2>
+        <p id="score-text" style="font-size: 1.2rem;"></p>
+        <button onclick="location.reload()" style="background-color: var(--secondary); color: #111;">Skúsiť znova 🔄</button>
+    </div>
+</div>
+
+<script>
+// Databáza slovies podľa vzorov
+const verbDatabase = {
+    1: { name: "POTREBOVAŤ (-ova-)", verbs: ["bicyklovať sa", "boxovať", "cestovať", "ďakovať", "existovať", "fungovať", "gratulovať", "gumovať", "havarovať", "korčuľovať sa", "kritizovať", "lyžovať sa", "maľovať", "milovať", "nakupovať", "nastupovať", "obedovať", "odpisovať", "otravovať", "parkovať", "pilotovať", "pracovať", "predstavovať si", "raňajkovať", "reagovať", "recitovať", "relaxovať", "rýľovať", "sánkovať sa", "sľubovať", "šoférovať", "sprchovať sa", "sťažovať sa", "tancovať", "telefonovať", "ukazovať", "upratovať", "vtipkovať", "vyfarbovať", "vystupovať", "vysvetľovať"] },
+    2: { name: "HOVORIŤ (-i-)", verbs: ["baliť", "chodiť", "chrániť", "chváliť", "cítiť (sa)", "cvičiť", "dovoliť", "hanbiť sa", "hlásiť sa", "kaziť", "končiť sa", "kosiť", "kresliť", "kŕmiť", "liečiť", "lúčiť sa", "lúštiť", "meniť sa", "mýliť sa", "narodiť sa", "nosiť", "nudiť sa", "páčiť sa", "robiť", "sadiť", "snežiť", "strážiť", "súhlasiť", "súťažiť", "svietiť", "tešiť sa", "tlačiť", "točiť sa", "topiť sa", "učiť sa", "učiť", "variť", "zdobiť", "zdraviť (sa)"] },
+    3: { name: "PIŤ (POZOR na vzor!)", verbs: ["žiť", "piť", "počuť", "biť (sa)", "umyť"] },
+    4: { name: "MUSIEŤ (-ie-)", verbs: ["bolieť", "horieť", "letieť", "myslieť", "sedieť", "smrdieť", "vidieť", "visieť"] },
+    5: { name: "ROZUMIEŤ (výnimka)", verbs: ["utrieť", "pozrieť sa", "rozprestrieť"] },
+    6: { name: "KRIČAŤ (výnimka)", verbs: ["držať", "ležať", "pršať", "spať", "kričať", "bežať"] },
+    7: { name: "KLAMAŤ (výnimka)", verbs: ["česať sa", "frflať", "hádzať", "hrabať", "hýbať (sa)", "kašľať", "klamať", "kopať", "kúpať sa", "lízať", "písať", "plakať", "skákať", "škrabať sa", "chápať", "štvať", "rehotať sa"] },
+    8: { name: "MAŤ (-a-)", verbs: ["behať", "blýskať sa", "búchať", "bývať", "čakať", "červenať sa", "chytať", "čítať", "dávať", "dostávať", "dvíhať", "fúkať", "hádať sa", "hľadať", "hladkať", "hnevať sa", "hojdať sa", "hrať (sa)", "krájať", "krvácať", "kýchať", "lietať", "mávať", "meškať", "neznášať", "oberať", "obzerať sa", "odchádzať", "odpočívať", "opekať", "odpovedať", "okopávať", "opierať sa", "otvárať", "padať", "pamätať si", "plávať", "počítať", "počúvať", "polievať", "podobať sa", "pomáhať", "ponáhľať sa", "posielať", "poslúchať", "používať", "pozerať", "poznať", "pozývať", "prichádzať", "pýtať sa", "rozmýšľať", "rozprávať", "šepkať", "šmýkať sa", "snívať", "spievať", "spoznávať", "starať sa o", "ťahať", "trhať", "umývať", "usmievať sa", "utekať", "utierať", "volať sa", "vstávať", "vyhrávať", "vysávať", "zabávať sa", "začínať sa", "zametať", "zatvárať", "zbierať", "žmurkať", "obliekať sa", "stávať", "večerať", "stmievať sa", "schovávať sa", "voňať"] },
+    9: { name: "KRADNÚŤ (-nú-)", verbs: ["chudnúť", "kradnúť", "starnúť", "mladnúť", "žltnúť", "hnednúť"] }
+};
+
+// Vety pre 2. časť (doplňovanie tvarov vrátane chytákov)
+const sentenceBank = [
+    { template: "Deti sa radostne {verb} na vtipnej rozprávke.", verb: "rehotať sa", answer: "rehocú sa" },
+    { template: "Mama po večeri stôl rýchlo {verb}.", verb: "utrieť", answer: "utrie" },
+    { template: "Môj starý otec vždy po obede {verb}.", verb: "večerať", answer: "večeria" },
+    { template: "V záhrade krásne {verb} kvety.", verb: "voňať", answer: "voňajú" },
+    { template: "Chlapci na dvore rýchlo {verb} za loptou.", verb: "utekať", answer: "utekajú" },
+    { template: "Oni sa na mňa pozorne {verb}.", verb: "pozrieť sa", answer: "pozrú sa" },
+    { template: "Každé ráno si s radosťou {verb} zuby.", verb: "čistiť", answer: "čistím" },
+    { template: "Žiaci usilovne {verb} novú gramatiku.", verb: "učiť sa", answer: "učia sa" },
+    { template: "Vtáky v zime {verb} na teplé miesta.", verb: "letieť", answer: "letia" },
+    { template: "Sestra si pred zrkadlom vlasy {verb}.", verb: "česať sa", answer: "češe" }
+];
+
+let generatedPart1 = [];
+let generatedPart2 = [];
+
+function getRandomVerbs(count) {
+    let pool = [];
+    Object.keys(verbDatabase).forEach(key => {
+        verbDatabase[key].verbs.forEach(v => {
+            pool.push({ verb: v, pattern: key });
+        });
+    });
+    // Shuffle
+    pool.sort(() => Math.random() - 0.5);
+    return pool.slice(0, count);
+}
+
+function renderQuiz() {
+    // Generovanie 1. časti (10 slovies)
+    generatedPart1 = getRandomVerbs(10);
+    const p1Container = document.getElementById('part1-questions');
+    p1Container.innerHTML = '';
+
+    generatedPart1.forEach((item, index) => {
+        let optionsHtml = `<option value="">-- Vyber vzor --</option>`;
+        Object.keys(verbDatabase).forEach(pKey => {
+            optionsHtml += `<option value="${pKey}">${pKey}. Vzor ${verbDatabase[pKey].name}</option>`;
+        });
+
+        p1Container.innerHTML += `
+            <div class="question">
+                <p>${index + 1}. Sloveso: <strong>${item.verb}</strong></p>
+                <select id="p1-${index}">${optionsHtml}</select>
+                <span id="p1-fb-${index}" class="feedback-text"></span>
+            </div>
+        `;
+    });
+
+    // Generovanie 2. časti (5 viet)
+    const shuffledSentences = [...sentenceBank].sort(() => Math.random() - 0.5);
+    generatedPart2 = shuffledSentences.slice(0, 5);
+    const p2Container = document.getElementById('part2-questions');
+    p2Container.innerHTML = '';
+
+    generatedPart2.forEach((item, index) => {
+        const parts = item.template.split('{verb}');
+        p2Container.innerHTML += `
+            <div class="question fill-blank">
+                <p>${index + 1}. ${parts[0]} <strong>(${item.verb})</strong> ${parts[1]}</p>
+                <input type="text" id="p2-${index}" placeholder="doplň tvar..." autocomplete="off">
+                <span id="p2-fb-${index}" class="feedback-text"></span>
+            </div>
+        `;
+    });
+}
+
+function checkAnswers() {
+    let totalScore = 0;
+    const maxScore = generatedPart1.length + generatedPart2.length;
+
+    // Kontrola 1. časti
+    generatedPart1.forEach((item, index) => {
+        const select = document.getElementById(`p1-${index}`);
+        const feedback = document.getElementById(`p1-fb-${index}`);
+        const userVal = select.value;
+
+        select.classList.remove('correct', 'incorrect');
+        
+        if (userVal === item.pattern) {
+            totalScore++;
+            select.classList.add('correct');
+            feedback.className = "feedback-text correct-text";
+            feedback.innerText = "✓ Správne!";
+        } else {
+            select.classList.add('incorrect');
+            feedback.className = "feedback-text incorrect-text";
+            feedback.innerText = `✗ Nesprávne. Správny vzor: ${item.pattern}. Vzor ${verbDatabase[item.pattern].name}`;
+        }
+    });
+
+    // Kontrola 2. časti
+    generatedPart2.forEach((item, index) => {
+        const input = document.getElementById(`p2-${index}`);
+        const feedback = document.getElementById(`p2-fb-${index}`);
+        const userVal = input.value.trim().toLowerCase();
+
+        input.classList.remove('correct', 'incorrect');
+
+        if (userVal === item.answer.toLowerCase()) {
+            totalScore++;
+            input.classList.add('correct');
+            feedback.className = "feedback-text correct-text";
+            feedback.innerText = "✓ Správne!";
+        } else {
+            input.classList.add('incorrect');
+            feedback.className = "feedback-text incorrect-text";
+            feedback.innerText = `✗ Nesprávne. Správny tvar: "${item.answer}"`;
+        }
+    });
+
+    // Vyhodnotenie
+    const resultDiv = document.getElementById('result');
+    const scoreTitle = document.getElementById('score-title');
+    const scoreText = document.getElementById('score-text');
+
+    resultDiv.style.display = 'block';
+    scoreText.innerText = `Získal/a si ${totalScore} z ${maxScore} bodov.`;
+
+    const percentage = (totalScore / maxScore) * 100;
+    if (percentage === 100) {
+        scoreTitle.innerText = "🎉 Výborne! Si majster slovies!";
+    } else if (percentage >= 75) {
+        scoreTitle.innerText = "👍 Skvelá práca! Ide ti to velmi dobre.";
+    } else if (percentage >= 50) {
+        scoreTitle.innerText = "🙂 Dobrý pokus! Ešte si to trochu precvič.";
+    } else {
+        scoreTitle.innerText = "💪 Nevzdávaj to! Skús to ešte raz.";
+    }
+
+    resultDiv.scrollIntoView({ behavior: 'smooth' });
+}
+
+// Spustenie kvízu pri načítaní
+window.onload = renderQuiz;
+</script>
+
+</body>
+</html>
